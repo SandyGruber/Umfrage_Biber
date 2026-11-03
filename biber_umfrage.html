@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biber Informatik Wettbewerb 2026 - Umfrage</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- Header -->
+    <header class="bg-indigo-600 text-white shadow-md">
+        <div class="max-w-5xl mx-auto px-4 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <span class="bg-indigo-500 text-xs uppercase tracking-wider px-2.5 py-1 rounded-full font-semibold">Wettbewerb 2026</span>
+                <h1 class="text-2xl md:text-3xl font-bold mt-1">Biber Informatik Wettbewerb</h1>
+                <p class="text-indigo-100 text-sm mt-0.5">Termin- und Zukunftstag-Erfassung</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="btnStudentView" onclick="switchView('student')" class="px-4 py-2 text-sm font-medium rounded-lg bg-white text-indigo-600 shadow transition hover:bg-indigo-50">
+                    Formular ausfüllen
+                </button>
+                <button id="btnAdminView" onclick="switchView('admin')" class="px-4 py-2 text-sm font-medium rounded-lg bg-indigo-700 text-white hover:bg-indigo-800 transition border border-indigo-500">
+                    Admin-Resultate 📊
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-5xl mx-auto px-4 py-8 flex-grow w-full">
+
+        <!-- Notification Toast -->
+        <div id="toast" class="hidden mb-6 p-4 rounded-xl text-sm font-medium transition-all shadow-sm"></div>
+
+        <!-- STUDENT VIEW -->
+        <div id="studentView" class="space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+                <h2 class="text-xl font-semibold text-slate-900 mb-2">Teilnahmebestätigung</h2>
+                <p class="text-slate-600 text-sm mb-6">
+                    Bitte wähle deinen Namen aus der Liste aus und gib an, an welchem Datum du teilnimmst bzw. ob du am Zukunftstag bist.
+                </p>
+
+                <form id="attendanceForm" onsubmit="handleSubmit(event)" class="space-y-6">
+                    <!-- Student Selection -->
+                    <div>
+                        <label for="studentSelect" class="block text-sm font-medium text-slate-700 mb-1.5">Dein Name:</label>
+                        <select id="studentSelect" required class="w-full rounded-xl border border-slate-300 py-3 px-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white shadow-sm">
+                            <value value="">-- Bitte Name auswählen --</option>
+                        </select>
+                    </div>
+
+                    <!-- Options -->
+                    <div class="space-y-4 pt-2">
+                        <label class="block text-sm font-medium text-slate-700">Wähle deinen Anwesenheitstermin:</label>
+                        
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+                                <input type="radio" name="attendanceDate" value="12_nov" required class="w-4 h-4 text-indigo-600 focus:ring-indigo-500">
+                                <span class="text-sm font-medium text-slate-700">Ich komme am 12. November</span>
+                            </label>
+
+                            <label class="flex items-center gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+                                <input type="radio" name="attendanceDate" value="19_nov" required class="w-4 h-4 text-indigo-600 focus:ring-indigo-500">
+                                <span class="text-sm font-medium text-slate-700">Ich komme am 19. November</span>
+                            </label>
+                        </div>
+
+                        <div class="pt-2">
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Zusatzfrage:</label>
+                            <label class="flex items-center gap-3 p-3.5 rounded-xl border border-amber-200 bg-amber-50/50 hover:bg-amber-50 cursor-pointer transition">
+                                <input type="checkbox" id="zukunftstagCheck" class="w-4 h-4 text-amber-600 rounded focus:ring-amber-500">
+                                <span class="text-sm font-medium text-amber-900">Ich bin am 12. November am Zukunftstag</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full py-3.5 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-md transition duration-200">
+                        Absenden
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ADMIN VIEW -->
+        <div id="adminView" class="hidden space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <div>
+                        <h2 class="text-xl font-semibold text-slate-900">Admin-Resultate & Übersicht</h2>
+                        <p class="text-slate-500 text-sm">Übersicht aller abgegebenen Rückmeldungen der Schüler.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="exportCSV()" class="px-3.5 py-2 text-xs font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm transition">
+                            📥 CSV Exportieren
+                        </button>
+                        <button onclick="resetData()" class="px-3.5 py-2 text-xs font-semibold rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 transition">
+                            🗑️ Alle Daten zurücksetzen
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats summary badges -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <span class="text-xs font-medium text-slate-500 uppercase tracking-wide">12. November</span>
+                        <p id="count12" class="text-2xl font-bold text-indigo-600 mt-1">0</p>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <span class="text-xs font-medium text-slate-500 uppercase tracking-wide">19. November</span>
+                        <p id="count19" class="text-2xl font-bold text-indigo-600 mt-1">0</p>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <span class="text-xs font-medium text-slate-500 uppercase tracking-wide">Zukunftstag (12. Nov)</span>
+                        <p id="countZukunft" class="text-2xl font-bold text-amber-600 mt-1">0</p>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="overflow-x-auto rounded-xl border border-slate-200">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 text-xs uppercase tracking-wider border-b border-slate-200">
+                                <th class="py-3 px-4 font-semibold">Nr.</th>
+                                <th class="py-3 px-4 font-semibold">Name, Vorname</th>
+                                <th class="py-3 px-4 font-semibold">Termin</th>
+                                <th class="py-3 px-4 font-semibold">Zukunftstag</th>
+                                <th class="py-3 px-4 font-semibold">Zeitstempel</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsTableBody" class="divide-y divide-slate-200 text-sm">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-12 py-4 text-center text-xs text-slate-500">
+        Biber Informatik Wettbewerb 2026 &bull; Lokale Web-App
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // List of students extracted from the image
+        const students = [
+            "Dossenbach Isabelle",
+            "Matwich Timothe",
+            "Wittwer Rabea",
+            "Muralt Levi",
+            "Imfeld Noah",
+            "Schmutz Nino",
+            "Gysi Tristan",
+            "Steimle Florian",
+            "Bitzer Elin",
+            "Seiler Jann",
+            "Schnidrig Livio",
+            "Heidlberger Nicolas",
+            "Lin Kaiwen",
+            "Ackle-Lüchinger Amélie",
+            "Wild Iuna",
+            "Zaugg Remo",
+            "Geiger Mattis",
+            "Fehlmann Mauro",
+            "Yildirim Ömer",
+            "Horlacher Leo",
+            "Lüthard Lucas",
+            "Anliker Emanuel",
+            "Papadopoulos Ilias",
+            "Leuenberger Aaron",
+            "Mettauer Elyn Jana",
+            "Gschwendner Valentin",
+            "Rupp Iuno",
+            "Hefti Enya",
+            "Costan Leonardo",
+            "Simoni Ennio",
+            "Schmid Elias",
+            "Mager Tabea",
+            "Diep Nolan",
+            "Wunderlin Ursin",
+            "Tewelde Liam",
+            "Bürdel Levi",
+            "Raja Erik",
+            "Augustin Tom"
+        ];
+
+        // Initialize App on load
+        window.onload = function() {
+            populateStudentDropdown();
+            renderAdminTable();
+        };
+
+        // Populate student select dropdown
+        function populateStudentDropdown() {
+            const select = document.getElementById('studentSelect');
+            select.innerHTML = '<option value="">-- Bitte Name auswählen --</option>';
+            
+            students.forEach((student, index) => {
+                const opt = document.createElement('option');
+                opt.value = student;
+                opt.textContent = `${index + 1}. ${student}`;
+                select.appendChild(opt);
+            });
+        }
+
+        // Switch between views
+        function switchView(view) {
+            const studentView = document.getElementById('studentView');
+            const adminView = document.getElementById('adminView');
+            const btnStudent = document.getElementById('btnStudentView');
+            const btnAdmin = document.getElementById('btnAdminView');
+
+            if (view === 'student') {
+                studentView.classList.remove('hidden');
+                adminView.classList.add('hidden');
+                btnStudent.className = "px-4 py-2 text-sm font-medium rounded-lg bg-white text-indigo-600 shadow transition hover:bg-indigo-50";
+                btnAdmin.className = "px-4 py-2 text-sm font-medium rounded-lg bg-indigo-700 text-white hover:bg-indigo-800 transition border border-indigo-500";
+            } else {
+                studentView.classList.add('hidden');
+                adminView.classList.remove('hidden');
+                btnAdmin.className = "px-4 py-2 text-sm font-medium rounded-lg bg-white text-indigo-600 shadow transition hover:bg-indigo-50";
+                btnStudent.className = "px-4 py-2 text-sm font-medium rounded-lg bg-indigo-700 text-white hover:bg-indigo-800 transition border border-indigo-500";
+                renderAdminTable();
+            }
+        }
+
+        // Handle Form Submission
+        function handleSubmit(e) {
+            e.preventDefault();
+            const studentName = document.getElementById('studentSelect').value;
+            const selectedDate = document.querySelector('input[name="attendanceDate"]:checked').value;
+            const isZukunftstag = document.getElementById('zukunftstagCheck').checked;
+
+            if (!studentName) {
+                showToast("Bitte wähle deinen Namen aus.", "error");
+                return;
+            }
+
+            // Retrieve current submissions from localStorage
+            let submissions = JSON.parse(localStorage.getItem('biber_submissions') || '{}');
+
+            // Save or update submission
+            submissions[studentName] = {
+                date: selectedDate,
+                zukunftstag: isZukunftstag,
+                timestamp: new Date().toLocaleString('de-CH')
+            };
+
+            localStorage.setItem('biber_submissions', JSON.stringify(submissions));
+
+            showToast(`Vielen Dank, ${studentName}! Deine Antwort wurde erfolgreich gespeichert.`, "success");
+            
+            // Reset form
+            document.getElementById('attendanceForm').reset();
+        }
+
+        // Render Admin Table and Stats
+        function renderAdminTable() {
+            const submissions = JSON.parse(localStorage.getItem('biber_submissions') || '{}');
+            const tbody = document.getElementById('resultsTableBody');
+            tbody.innerHTML = '';
+
+            let count12 = 0;
+            let count19 = 0;
+            let countZukunft = 0;
+
+            students.forEach((student, index) => {
+                const sub = submissions[student];
+                let dateBadge = '<span class="px-2.5 py-1 text-xs font-medium bg-slate-100 text-slate-500 rounded-full">Ausstehend</span>';
+                let zukunftBadge = '-';
+                let timeText = '-';
+
+                if (sub) {
+                    if (sub.date === '12_nov') {
+                        count12++;
+                        dateBadge = '<span class="px-2.5 py-1 text-xs font-semibold bg-indigo-50 text-indigo-700 rounded-full border border-indigo-200">12. November</span>';
+                    } else if (sub.date === '19_nov') {
+                        count19++;
+                        dateBadge = '<span class="px-2.5 py-1 text-xs font-semibold bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">19. November</span>';
+                    }
+
+                    if (sub.zukunftstag) {
+                        countZukunft++;
+                        zukunftBadge = '<span class="px-2.5 py-1 text-xs font-semibold bg-amber-50 text-amber-700 rounded-full border border-amber-200">Ja</span>';
+                    } else {
+                        zukunftBadge = '<span class="text-slate-400 text-xs">Nein</span>';
+                    }
+
+                    timeText = sub.timestamp;
+                }
+
+                const row = document.createElement('tr');
+                row.className = "hover:bg-slate-50 transition";
+                row.innerHTML = `
+                    <td class="py-3 px-4 text-slate-500 font-medium">${index + 1}</td>
+                    <td class="py-3 px-4 font-semibold text-slate-800">${student}</td>
+                    <td class="py-3 px-4">${dateBadge}</td>
+                    <td class="py-3 px-4">${zukunftBadge}</td>
+                    <td class="py-3 px-4 text-slate-500 text-xs">${timeText}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Update counters
+            document.getElementById('count12').textContent = count12;
+            document.getElementById('count19').textContent = count19;
+            document.getElementById('countZukunft').textContent = countZukunft;
+        }
+
+        // CSV Export Function
+        function exportCSV() {
+            const submissions = JSON.parse(localStorage.getItem('biber_submissions') || '{}');
+            let csvContent = "data:text/csv;charset=utf-8,Nr,Name,Termin,Zukunftstag,Zeitstempel\n";
+
+            students.forEach((student, index) => {
+                const sub = submissions[student];
+                const dateVal = sub ? (sub.date === '12_nov' ? '12. November' : '19. November') : "Keine Angabe";
+                const zukunftVal = sub ? (sub.zukunftstag ? 'Ja' : 'Nein') : "-";
+                const time = sub ? sub.timestamp : "-";
+                csvContent += `${index + 1},"${student}","${dateVal}","${zukunftVal}","${time}"\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "biber_wettbewerb_2026_resultate.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Reset Data
+        function resetData() {
+            if (confirm("Möchtest du wirklich alle bisherigen Antworten unwiderruflich löschen?")) {
+                localStorage.removeItem('biber_submissions');
+                renderAdminTable();
+                showToast("Alle Daten wurden zurückgesetzt.", "success");
+            }
+        }
+
+        // Toast Helper
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `mb-6 p-4 rounded-xl text-sm font-medium shadow-sm transition-all ${
+                type === 'error' ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+            }`;
+            toast.classList.remove('hidden');
+
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
